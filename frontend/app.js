@@ -47,49 +47,24 @@ async function savePerms() {
   outputEl.textContent = 'Permissions saved.';
 }
 
-
-
 async function pushNotification() {
   const title = document.getElementById('notifTitle').value.trim() || 'Notification';
   const body = document.getElementById('notifBody').value.trim();
   const r = await fetch(api('/notifications'), {
     method: 'POST', headers: headers(), body: JSON.stringify({ title, body }),
   });
-  const data = await r.json();
-  if (r.status === 409 && data.clarification_required) {
-    outputEl.textContent = data.message + " Click Run OS Action again to confirm.";
-    const rr = await fetch(api('/os_action'), {
-      method: "POST", headers: headers(), body: JSON.stringify({ action, confirmed: true }),
-    });
-    const dd = await rr.json();
-    outputEl.textContent += "\nConfirmed result: " + JSON.stringify(dd);
-    return;
-  }
-  outputEl.textContent = JSON.stringify(data, null, 2);
+  outputEl.textContent = JSON.stringify(await r.json(), null, 2);
 }
 
 async function loadNotifications() {
   const r = await fetch(api('/notifications'), { headers: headers() });
-  const data = await r.json();
-  if (r.status === 409 && data.clarification_required) {
-    outputEl.textContent = data.message + " Click Run OS Action again to confirm.";
-    const rr = await fetch(api('/os_action'), {
-      method: "POST", headers: headers(), body: JSON.stringify({ action, confirmed: true }),
-    });
-    const dd = await rr.json();
-    outputEl.textContent += "\nConfirmed result: " + JSON.stringify(dd);
-    return;
-  }
-  outputEl.textContent = JSON.stringify(data, null, 2);
+  outputEl.textContent = JSON.stringify(await r.json(), null, 2);
 }
 
 async function checkHealth() {
   const r = await fetch(api('/health'), { headers: headers() });
-  const data = await r.json();
-  healthEl.textContent = JSON.stringify(data, null, 2);
+  healthEl.textContent = JSON.stringify(await r.json(), null, 2);
 }
-
-
 
 async function loadContext() {
   const r = await fetch(api('/context'), { headers: headers() });
@@ -115,17 +90,7 @@ async function setReminder() {
   const r = await fetch(api('/reminders'), {
     method: 'POST', headers: headers(), body: JSON.stringify({ title, at }),
   });
-  const data = await r.json();
-  if (r.status === 409 && data.clarification_required) {
-    outputEl.textContent = data.message + " Click Run OS Action again to confirm.";
-    const rr = await fetch(api('/os_action'), {
-      method: "POST", headers: headers(), body: JSON.stringify({ action, confirmed: true }),
-    });
-    const dd = await rr.json();
-    outputEl.textContent += "\nConfirmed result: " + JSON.stringify(dd);
-    return;
-  }
-  outputEl.textContent = JSON.stringify(data, null, 2);
+  outputEl.textContent = JSON.stringify(await r.json(), null, 2);
 }
 
 async function getSuggestions() {
@@ -134,7 +99,6 @@ async function getSuggestions() {
   suggestionsEl.textContent = JSON.stringify(data.suggestions || data, null, 2);
 }
 
-
 async function runOsAction() {
   const action = document.getElementById('osAction').value.trim();
   const r = await fetch(api('/os_action'), {
@@ -142,12 +106,10 @@ async function runOsAction() {
   });
   const data = await r.json();
   if (r.status === 409 && data.clarification_required) {
-    outputEl.textContent = data.message + " Click Run OS Action again to confirm.";
     const rr = await fetch(api('/os_action'), {
-      method: "POST", headers: headers(), body: JSON.stringify({ action, confirmed: true }),
+      method: 'POST', headers: headers(), body: JSON.stringify({ action, confirmed: true }),
     });
-    const dd = await rr.json();
-    outputEl.textContent += "\nConfirmed result: " + JSON.stringify(dd);
+    outputEl.textContent = JSON.stringify(await rr.json(), null, 2);
     return;
   }
   outputEl.textContent = JSON.stringify(data, null, 2);
@@ -159,17 +121,7 @@ async function searchDevice() {
   const r = await fetch(api('/device_search'), {
     method: 'POST', headers: headers(), body: JSON.stringify({ base_path: base, query }),
   });
-  const data = await r.json();
-  if (r.status === 409 && data.clarification_required) {
-    outputEl.textContent = data.message + " Click Run OS Action again to confirm.";
-    const rr = await fetch(api('/os_action'), {
-      method: "POST", headers: headers(), body: JSON.stringify({ action, confirmed: true }),
-    });
-    const dd = await rr.json();
-    outputEl.textContent += "\nConfirmed result: " + JSON.stringify(dd);
-    return;
-  }
-  outputEl.textContent = JSON.stringify(data, null, 2);
+  outputEl.textContent = JSON.stringify(await r.json(), null, 2);
 }
 
 async function askAssistant() {
@@ -182,13 +134,11 @@ async function askAssistant() {
   });
   const data = await resp.json();
   if (resp.status === 409 && data.clarification_required) {
-    outputEl.textContent = data.message + " Resending with confirmation...";
     const r2 = await fetch(api('/generate'), {
-      method: "POST", headers: headers(), body: JSON.stringify({ prompt, n_predict: 64, confirmed: true }),
+      method: 'POST', headers: headers(), body: JSON.stringify({ prompt, n_predict: 64, confirmed: true }),
     });
     const d2 = await r2.json();
-    const t2 = d2.output || d2.error || JSON.stringify(d2);
-    outputEl.textContent = t2;
+    outputEl.textContent = d2.output || d2.error || JSON.stringify(d2);
     return;
   }
   const text = data.output || data.error || JSON.stringify(data);
