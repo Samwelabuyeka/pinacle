@@ -9,12 +9,11 @@
 <body>
   <main class="app">
     <h1>Maya Assistant</h1>
-    <p class="sub">Siri-style voice UX for your private local/cloud BitNet API.</p>
+    <p class="sub">OVOS/HiveMind-style assistant shell with privacy guardrails.</p>
 
     <section class="panel">
       <label>API Base URL</label>
       <input id="apiBase" value="http://127.0.0.1:8080" />
-
       <label>API Key</label>
       <input id="apiKey" type="password" placeholder="BITNET_CLOUD_API_KEY" />
     </section>
@@ -27,7 +26,10 @@
         <label><input type="checkbox" id="perm_make_calls"> Make calls</label>
         <label><input type="checkbox" id="perm_manage_calendar"> Manage calendar</label>
         <label><input type="checkbox" id="perm_location_access"> Location access</label>
-        <label><input type="checkbox" id="perm_run_when_phone_off"> Run tasks when phone is off (cloud mode)</label>
+        <label><input type="checkbox" id="perm_run_when_phone_off"> Run when phone off</label>
+        <label><input type="checkbox" id="perm_device_search"> Device page/file search</label>
+        <label><input type="checkbox" id="perm_always_mic"> Always mic</label>
+        <label><input type="checkbox" id="perm_always_speaker"> Always speaker</label>
       </div>
       <div class="actions">
         <button id="loadPermsBtn">Load Permissions</button>
@@ -45,10 +47,16 @@
     </section>
 
     <section class="panel">
-      <h2>Queue a background task</h2>
-      <input id="taskTitle" placeholder="Task title" />
-      <textarea id="taskDetails" rows="2" placeholder="Task details"></textarea>
-      <button id="queueTaskBtn">Queue Task</button>
+      <h2>Device Search (privacy-guarded)</h2>
+      <input id="searchBase" value="$HOME/Documents" />
+      <input id="searchQuery" placeholder="file name fragment" />
+      <button id="searchBtn">Search Device</button>
+    </section>
+
+    <section class="panel">
+      <h2>Suggestions</h2>
+      <button id="suggestionsBtn">Get Suggestions</button>
+      <pre id="suggestions">(none)</pre>
     </section>
 
     <section class="panel">
@@ -56,7 +64,7 @@
       <pre id="output">(waiting)</pre>
     </section>
 
-    <p class="note">System-level Siri privileges are not possible from a web app alone. This app provides configurable local/cloud permissions in your own stack.</p>
+    <p class="note">Strong privacy defense is enabled via permission gates + filesystem allowlist for search.</p>
   </main>
 
   <script src="./app.js"></script>

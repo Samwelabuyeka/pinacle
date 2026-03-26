@@ -1,17 +1,22 @@
 # pinacle the greates
 
-## Maya assistant on top of Microsoft bitnet.cpp
+## Maya assistant on top of Microsoft bitnet.cpp + OVOS ecosystem
 
-You want Maya to feel like a living organism, always active, speaking, remembering, and handling tasks.
-This repo now includes an **organism loop** (continuous daemon + memory + task execution) in addition to the frontend/API.
+Maya is now structured to integrate with:
+- OVOS
+- HiveMind
+- whisper.cpp
+- piper
+- openWakeWord
+- Home Assistant
 
-### 1) Install bitnet.cpp + build binary
+### 1) Install core
 
 ```bash
 ./scripts/install_microsoft_local_ai.sh
 ```
 
-### 2) Start private cloud API + frontend
+### 2) Start private API + frontend
 
 ```bash
 ./scripts/make_private_cloud.sh
@@ -20,30 +25,22 @@ python -m http.server 4173
 # open http://127.0.0.1:4173/frontend/
 ```
 
-### 3) Start Maya organism mode (always-on loop)
+### 3) Start organism loop
 
 ```bash
 python scripts/maya_daemon.py --interval 10
 ```
 
-One-cycle dry run:
+### Powerful behavior added
+- Personality engine with learning events + proactive suggestions (`/events`, `/suggestions`)
+- Privacy-guarded device search (`/device_search`) with allowlisted directories only
+- Permission controls for always mic/speaker + device search + phone-off execution
+- Persistent memory and task processing loop
 
-```bash
-python scripts/maya_daemon.py --once
-```
+### Privacy defense
+- Explicit permission gates on sensitive capabilities
+- API key auth
+- filesystem search restricted to user-safe roots (Documents/Downloads/Desktop)
 
-### 4) Offline talking mode
-
-```bash
-python scripts/maya_offline_voice.py --text-only
-```
-
-### What this adds
-- long-running agent loop
-- persistent memory (`~/.maya_memory.db`)
-- background task execution from `~/.maya_tasks.json`
-- local BitNet inference path
-
-### Hard platform boundary
-Apple private Siri system APIs are not available to third-party code.
-This stack provides the closest equivalent behavior on your own infrastructure (local + private cloud + persistent agent loop).
+### Platform boundary
+Deep Apple-private Siri privileges are not available to third-party code, but this stack is designed to deliver a powerful Siri-like daily assistant experience across platforms with strong privacy controls.

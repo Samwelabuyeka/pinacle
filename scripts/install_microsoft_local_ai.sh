@@ -58,6 +58,9 @@ perms = {
     'manage_calendar': ask('manage_calendar'),
     'location_access': ask('location_access'),
     'run_when_phone_off': ask('run_when_phone_off'),
+    'device_search': ask('device_search'),
+    'always_mic': ask('always_mic', default=True),
+    'always_speaker': ask('always_speaker', default=True),
 }
 perm_file.write_text(json.dumps(perms, indent=2))
 print(f'Permissions saved: {perm_file}')
@@ -75,6 +78,9 @@ if not perm_file.exists():
         'manage_calendar': False,
         'location_access': False,
         'run_when_phone_off': False,
+        'device_search': False,
+        'always_mic': True,
+        'always_speaker': True,
     }, indent=2))
 print(f'Permissions file ready: {perm_file}')
 PY

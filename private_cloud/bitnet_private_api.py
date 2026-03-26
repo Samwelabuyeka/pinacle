@@ -2,8 +2,16 @@
 import json
 import os
 import subprocess
+import sys
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from maya_core.personality import PersonalityEngine
+from maya_core.privacy_guard import can_access_path, search_files
 
 HOST = os.environ.get("BITNET_CLOUD_HOST", "127.0.0.1")
 PORT = int(os.environ.get("BITNET_CLOUD_PORT", "8080"))
@@ -23,7 +31,12 @@ DEFAULT_PERMISSIONS = {
     "manage_calendar": False,
     "location_access": False,
     "run_when_phone_off": False,
+    "device_search": False,
+    "always_mic": True,
+    "always_speaker": True,
 }
+
+PERSONA = PersonalityEngine()
 
 
 def read_json(path: Path, default):
@@ -69,6 +82,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, {"permissions": get_permissions()})
         if self.path == "/tasks":
             return self._send(200, {"tasks": read_json(TASK_FILE, [])})
+        if self.path == "/suggestions":
+            return self._send(200, {"suggestions": PERSONA.suggestions()})
         return self._send(404, {"error": "not_found"})
 
     def do_POST(self):
@@ -86,6 +101,10 @@ class Handler(BaseHTTPRequestHandler):
             write_json(PERM_FILE, current)
             return self._send(200, {"permissions": current})
 
+        if self.path == "/events":
+            PERSONA.record_event(data.get("event", "generic"), data.get("value", ""))
+            return self._send(200, {"ok": True})
+
         if self.path == "/tasks":
             task = {
                 "title": data.get("title", "Untitled task"),
@@ -96,6 +115,18 @@ class Handler(BaseHTTPRequestHandler):
             tasks.append(task)
             write_json(TASK_FILE, tasks)
             return self._send(200, {"task": task, "message": "Task queued"})
+
+        if self.path == "/device_search":
+            perms = get_permissions()
+            if not perms.get("device_search"):
+                return self._send(403, {"error": "permission_denied: device_search"})
+            base = data.get("base_path", str(Path.home() / "Documents"))
+            query = data.get("query", "")
+            if not query:
+                return self._send(400, {"error": "query_required"})
+            if not can_access_path(base):
+                return self._send(403, {"error": "privacy_guard_blocked_path"})
+            return self._send(200, {"results": search_files(base, query)})
 
         if self.path != "/generate":
             return self._send(404, {"error": "not_found"})
@@ -127,7 +158,7 @@ class Handler(BaseHTTPRequestHandler):
 
         try:
             proc = subprocess.run(cmd, capture_output=True, text=True, check=True, cwd=BITNET_DIR)
-            return self._send(200, {"output": proc.stdout.strip()})
+            return self._send(200, {"output": proc.stdout.strip(), "suggestions": PERSONA.suggestions()})
         except subprocess.CalledProcessError as exc:
             return self._send(500, {"error": exc.stderr[-1000:]})
 
