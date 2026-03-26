@@ -1,0 +1,20 @@
+{
+  "capabilities": [
+    {"id": "make_calls", "status": "plugin_required", "notes": "native telephony adapter"},
+    {"id": "answer_calls", "status": "plugin_required", "notes": "native call-screening adapter"},
+    {"id": "send_sms", "status": "plugin_required", "notes": "native messaging adapter"},
+    {"id": "read_messages", "status": "plugin_required", "notes": "native messaging read permissions"},
+    {"id": "announce_notifications", "status": "available", "notes": "notifications endpoint + organism announce"},
+    {"id": "set_reminders", "status": "available", "notes": "reminders endpoint"},
+    {"id": "alarms_timers", "status": "plugin_required", "notes": "platform alarm service"},
+    {"id": "calendar_events", "status": "plugin_required", "notes": "calendar API adapter"},
+    {"id": "app_launch", "status": "plugin_required", "notes": "native app-control bridge"},
+    {"id": "navigation", "status": "plugin_required", "notes": "maps/navigation adapter"},
+    {"id": "music_control", "status": "plugin_required", "notes": "media session adapter"},
+    {"id": "device_settings_toggle", "status": "plugin_required", "notes": "os settings bridge"},
+    {"id": "contextual_suggestions", "status": "available", "notes": "personality + event engine"},
+    {"id": "offline_voice_chat", "status": "available", "notes": "local bitnet + optional stt/tts"},
+    {"id": "device_search", "status": "available", "notes": "privacy allowlist guarded"},
+    {"id": "task_automation", "status": "available", "notes": "organism loop"}
+  ]
+}

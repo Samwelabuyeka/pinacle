@@ -51,6 +51,12 @@ if REF_FILE.exists():
 else:
     SIRI_CAPABILITY_CATALOG = []
 
+MATRIX_FILE = ROOT / "config" / "maya_capability_matrix.json"
+if MATRIX_FILE.exists():
+    MAYA_CAPABILITY_MATRIX = json.loads(MATRIX_FILE.read_text()).get("capabilities", [])
+else:
+    MAYA_CAPABILITY_MATRIX = []
+
 
 def read_json(path: Path, default):
     if not path.exists():
@@ -105,6 +111,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, {"catalog": SIRI_CAPABILITY_CATALOG})
         if self.path == "/notifications":
             return self._send(200, {"notifications": read_json(NOTIF_FILE, [])})
+        if self.path == "/capability_matrix":
+            return self._send(200, {"capabilities": MAYA_CAPABILITY_MATRIX})
         if self.path == "/health":
             health = {
                 "bitnet_dir": os.path.exists(BITNET_DIR),

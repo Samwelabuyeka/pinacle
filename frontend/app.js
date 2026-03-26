@@ -2,6 +2,7 @@ const outputEl = document.getElementById('output');
 const suggestionsEl = document.getElementById('suggestions');
 const capabilitiesEl = document.getElementById('capabilities');
 const healthEl = document.getElementById('healthOut');
+const matrixEl = document.getElementById('matrixOut');
 const apiBaseEl = document.getElementById('apiBase');
 const apiKeyEl = document.getElementById('apiKey');
 const promptEl = document.getElementById('prompt');
@@ -67,6 +68,13 @@ async function checkHealth() {
   const r = await fetch(api('/health'), { headers: headers() });
   const data = await r.json();
   healthEl.textContent = JSON.stringify(data, null, 2);
+}
+
+
+async function loadCapabilityMatrix() {
+  const r = await fetch(api('/capability_matrix'), { headers: headers() });
+  const data = await r.json();
+  matrixEl.textContent = JSON.stringify(data.capabilities || data, null, 2);
 }
 
 async function getCapabilities() {
@@ -140,6 +148,7 @@ document.getElementById('runOsActionBtn').addEventListener('click', runOsAction)
 document.getElementById('pushNotifBtn').addEventListener('click', pushNotification);
 document.getElementById('loadNotifBtn').addEventListener('click', loadNotifications);
 document.getElementById('healthBtn').addEventListener('click', checkHealth);
+document.getElementById('matrixBtn').addEventListener('click', loadCapabilityMatrix);
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const speakBtn = document.getElementById('speakBtn');

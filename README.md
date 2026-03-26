@@ -39,6 +39,7 @@ python scripts/maya_daemon.py --interval 10
 
 ### Core features for “next Siri” direction
 - Capability detection (`/capabilities`) so Maya knows what she can do
+- Full capability matrix (`/capability_matrix`) for Siri-like feature parity tracking
 - Personality engine + proactive suggestions (`/events`, `/suggestions`)
 - Reminders API (`/reminders`) + organism reminder processing
 - Privacy-guarded device search (`/device_search`) with allowlisted paths
