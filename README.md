@@ -2,19 +2,20 @@
 
 ## Microsoft open-source local AI runtime
 
-Installed **ONNX Runtime GenAI** (by Microsoft), which is used to run generative AI models locally.
+This repo now includes a runnable installer for **ONNX Runtime GenAI** (by Microsoft), which is used to run generative AI models locally.
 
-### Install command used
+### Run the installation
+
+```bash
+./scripts/install_microsoft_local_ai.sh
+```
+
+### What the script does
 
 ```bash
 python -m pip install --user onnxruntime-genai
-```
-
-### Quick verification
-
-```bash
 python - <<'PY'
 import onnxruntime_genai as og
-print(og.__version__)
+print(f"onnxruntime-genai installed: {og.__version__}")
 PY
 ```
