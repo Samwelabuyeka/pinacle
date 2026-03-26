@@ -36,6 +36,12 @@ class Handler(BaseHTTPRequestHandler):
         if not prompt:
             return self._send(400, {"error": "prompt_required"})
 
+        llama_cli = os.path.join(BITNET_DIR, "build/bin/llama-cli")
+        if not os.path.exists(llama_cli):
+            return self._send(503, {"error": f"missing_binary: {llama_cli}. Build BitNet first."})
+        if not os.path.exists(MODEL_PATH):
+            return self._send(503, {"error": f"missing_model: {MODEL_PATH}. Download model and run setup_env.py."})
+
         cmd = [
             "python",
             os.path.join(BITNET_DIR, "run_inference.py"),

@@ -19,12 +19,15 @@ $HOME/private-bitnet-cloud/start_private_cloud.sh
 
 This private cloud API binds to `127.0.0.1` by default and requires an API key from `$HOME/private-bitnet-cloud/.env`.
 
-### Test call
+### 3) Try talking to the AI
 
 ```bash
-source "$HOME/private-bitnet-cloud/.env"
-curl -s http://127.0.0.1:8080/generate \
-  -H "Authorization: Bearer $BITNET_CLOUD_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"prompt":"You are a helpful assistant","n_predict":32}'
+./scripts/talk_to_ai.sh "Hello BitNet"
+```
+
+If you see `missing_binary` or `missing_model`, finish BitNet runtime setup first:
+
+```bash
+huggingface-cli download microsoft/BitNet-b1.58-2B-4T-gguf --local-dir "$HOME/bitnet.cpp/models/BitNet-b1.58-2B-4T"
+python "$HOME/bitnet.cpp/setup_env.py" -md "$HOME/bitnet.cpp/models/BitNet-b1.58-2B-4T" -q i2_s
 ```
