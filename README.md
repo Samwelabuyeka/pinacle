@@ -1,45 +1,34 @@
 # pinacle the greates
 
-## Install Microsoft bitnet.cpp (local AI inference)
+## Maya assistant on top of Microsoft bitnet.cpp
 
-This project runs **Maya**, a Siri-style assistant UX on top of `microsoft/BitNet`.
+You asked for a true Siri. A true Siri clone is not possible outside Apple private OS integrations.
+What this repo gives you is the closest practical equivalent: an offline-capable local assistant with voice, local inference, and configurable permissions.
 
-### 1) Install bitnet.cpp + build the binary
+### 1) Install bitnet.cpp + build binary
 
 ```bash
 ./scripts/install_microsoft_local_ai.sh
 ```
 
-Installer behavior:
-- builds `~/bitnet.cpp/build/bin/llama-cli`
-- asks for permissions during install in interactive shells
-- stores permissions in `~/.maya_permissions.json`
-
-### 2) Start private cloud API
+### 2) Optional private-cloud API + frontend
 
 ```bash
 ./scripts/make_private_cloud.sh
 $HOME/private-bitnet-cloud/start_private_cloud.sh
-```
-
-### 3) Open frontend and manage permissions
-
-```bash
 python -m http.server 4173
 # open http://127.0.0.1:4173/frontend/
 ```
 
-Frontend capabilities:
-- voice input + spoken responses
-- permission management (`/permissions` API)
-- task queueing (`/tasks` API)
-- toggle `run_when_phone_off` for cloud-mode task execution policy
-
-### 4) Talk from terminal
+### 3) Offline talking mode (local)
 
 ```bash
-./scripts/talk_to_ai.sh "Hello Maya"
+python scripts/maya_offline_voice.py --text-only
+# or single prompt:
+python scripts/maya_offline_voice.py --once "Hello Maya" --text-only
 ```
 
-### Important platform note
-A web app cannot grant Apple's private Siri OS privileges. This implementation provides install-time permission prompts + editable permission settings in the frontend for your own local/cloud stack.
+This uses local BitNet inference only (no cloud required if model is local).
+
+### Hard limit
+Apple Siri system privileges (deep phone controls) are not available to third-party local scripts/web apps.
