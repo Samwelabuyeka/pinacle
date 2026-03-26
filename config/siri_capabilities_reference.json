@@ -1,0 +1,14 @@
+{
+  "source_note": "Compiled from Apple Support and Apple Developer Siri documentation.",
+  "capabilities": [
+    "make_and_receive_calls",
+    "send_and_read_messages",
+    "read_and_announce_notifications",
+    "set_reminders_and_alarms",
+    "calendar_management",
+    "app_launch_and_navigation",
+    "shortcuts_and_automations",
+    "contextual_suggestions",
+    "hands_free_follow_up_requests"
+  ]
+}
