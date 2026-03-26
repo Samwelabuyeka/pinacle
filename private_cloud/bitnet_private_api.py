@@ -26,6 +26,7 @@ MODEL_PATH = os.environ.get(
 PERM_FILE = Path(os.environ.get("MAYA_PERMISSIONS_FILE", os.path.expanduser("~/.maya_permissions.json")))
 TASK_FILE = Path(os.environ.get("MAYA_TASK_FILE", os.path.expanduser("~/.maya_tasks.json")))
 REMINDER_FILE = Path(os.environ.get("MAYA_REMINDER_FILE", os.path.expanduser("~/.maya_reminders.json")))
+NOTIF_FILE = Path(os.environ.get("MAYA_NOTIFICATION_FILE", os.path.expanduser("~/.maya_notifications.json")))
 
 DEFAULT_PERMISSIONS = {
     "ai_chat": True,
@@ -38,10 +39,22 @@ DEFAULT_PERMISSIONS = {
     "always_mic": True,
     "always_speaker": True,
     "os_level_control": False,
+    "notification_read": False,
 }
 
 PERSONA = PersonalityEngine()
 OSB = OSBridge()
+
+SIRI_CAPABILITY_CATALOG = [
+    "make_and_receive_calls",
+    "send_and_read_messages",
+    "read_and_announce_notifications",
+    "set_reminders_and_alarms",
+    "calendar_management",
+    "app_launch_and_navigation",
+    "shortcuts_and_automations",
+    "contextual_suggestions",
+]
 
 
 def read_json(path: Path, default):
@@ -93,6 +106,17 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, {"suggestions": PERSONA.suggestions()})
         if self.path == "/capabilities":
             return self._send(200, {"capabilities": detect_capabilities(get_permissions())})
+        if self.path == "/siri_capabilities":
+            return self._send(200, {"catalog": SIRI_CAPABILITY_CATALOG})
+        if self.path == "/notifications":
+            return self._send(200, {"notifications": read_json(NOTIF_FILE, [])})
+        if self.path == "/health":
+            health = {
+                "bitnet_dir": os.path.exists(BITNET_DIR),
+                "llama_cli": os.path.exists(os.path.join(BITNET_DIR, "build/bin/llama-cli")),
+                "permissions": PERM_FILE.exists(),
+            }
+            return self._send(200, health)
         return self._send(404, {"error": "not_found"})
 
     def do_POST(self):
@@ -137,6 +161,21 @@ class Handler(BaseHTTPRequestHandler):
             write_json(REMINDER_FILE, reminders)
             PERSONA.record_event("reminder_set", reminder["title"])
             return self._send(200, {"reminder": reminder})
+
+        if self.path == "/notifications":
+            perms = get_permissions()
+            if not perms.get("notification_read"):
+                return self._send(403, {"error": "permission_denied: notification_read"})
+            notif = {
+                "title": data.get("title", "Notification"),
+                "body": data.get("body", ""),
+                "status": "new",
+            }
+            notifications = read_json(NOTIF_FILE, [])
+            notifications.append(notif)
+            write_json(NOTIF_FILE, notifications)
+            PERSONA.record_event("notification_received", notif["title"])
+            return self._send(200, {"notification": notif})
 
         if self.path == "/os_action":
             perms = get_permissions()

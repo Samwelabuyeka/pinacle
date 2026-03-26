@@ -14,6 +14,7 @@ BITNET_DIR = Path(os.environ.get("BITNET_DIR", str(HOME / "bitnet.cpp")))
 MODEL_PATH = Path(os.environ.get("BITNET_MODEL", str(BITNET_DIR / "models/BitNet-b1.58-2B-4T/ggml-model-i2_s.gguf")))
 TASK_FILE = Path(os.environ.get("MAYA_TASK_FILE", str(HOME / ".maya_tasks.json")))
 REMINDER_FILE = Path(os.environ.get("MAYA_REMINDER_FILE", str(HOME / ".maya_reminders.json")))
+NOTIF_FILE = Path(os.environ.get("MAYA_NOTIFICATION_FILE", str(HOME / ".maya_notifications.json")))
 DB_PATH = Path(os.environ.get("MAYA_MEMORY_DB", str(HOME / ".maya_memory.db")))
 
 
@@ -70,6 +71,17 @@ class MayaOrganism:
     def _save_reminders(self, reminders: list[dict]):
         REMINDER_FILE.write_text(json.dumps(reminders, indent=2))
 
+    def _load_notifications(self) -> list[dict]:
+        if not NOTIF_FILE.exists():
+            return []
+        try:
+            return json.loads(NOTIF_FILE.read_text())
+        except Exception:
+            return []
+
+    def _save_notifications(self, notifications: list[dict]):
+        NOTIF_FILE.write_text(json.dumps(notifications, indent=2))
+
     def step(self) -> list[dict]:
         tasks = self._load_tasks()
         done = []
@@ -94,6 +106,14 @@ class MayaOrganism:
                 r["announced_at"] = time.time()
                 self.remember("reminder_announced", r)
         self._save_reminders(reminders)
+
+        notifications = self._load_notifications()
+        for n in notifications:
+            if n.get("status") == "new":
+                n["status"] = "announced"
+                n["announced_at"] = time.time()
+                self.remember("notification_announced", n)
+        self._save_notifications(notifications)
         return done
 
     def run_forever(self, interval_sec: int = 10):

@@ -1,13 +1,14 @@
 const outputEl = document.getElementById('output');
 const suggestionsEl = document.getElementById('suggestions');
 const capabilitiesEl = document.getElementById('capabilities');
+const healthEl = document.getElementById('healthOut');
 const apiBaseEl = document.getElementById('apiBase');
 const apiKeyEl = document.getElementById('apiKey');
 const promptEl = document.getElementById('prompt');
 
 const permKeys = [
   'ai_chat', 'send_sms', 'make_calls', 'manage_calendar', 'location_access',
-  'run_when_phone_off', 'device_search', 'always_mic', 'always_speaker', 'os_level_control'
+  'run_when_phone_off', 'device_search', 'always_mic', 'always_speaker', 'os_level_control', 'notification_read'
 ];
 
 const headers = () => ({
@@ -44,6 +45,29 @@ async function savePerms() {
   outputEl.textContent = 'Permissions saved.';
 }
 
+
+
+async function pushNotification() {
+  const title = document.getElementById('notifTitle').value.trim() || 'Notification';
+  const body = document.getElementById('notifBody').value.trim();
+  const r = await fetch(api('/notifications'), {
+    method: 'POST', headers: headers(), body: JSON.stringify({ title, body }),
+  });
+  const data = await r.json();
+  outputEl.textContent = JSON.stringify(data, null, 2);
+}
+
+async function loadNotifications() {
+  const r = await fetch(api('/notifications'), { headers: headers() });
+  const data = await r.json();
+  outputEl.textContent = JSON.stringify(data, null, 2);
+}
+
+async function checkHealth() {
+  const r = await fetch(api('/health'), { headers: headers() });
+  const data = await r.json();
+  healthEl.textContent = JSON.stringify(data, null, 2);
+}
 
 async function getCapabilities() {
   const r = await fetch(api('/capabilities'), { headers: headers() });
@@ -113,6 +137,9 @@ document.getElementById('suggestionsBtn').addEventListener('click', getSuggestio
 document.getElementById('capabilitiesBtn').addEventListener('click', getCapabilities);
 document.getElementById('setReminderBtn').addEventListener('click', setReminder);
 document.getElementById('runOsActionBtn').addEventListener('click', runOsAction);
+document.getElementById('pushNotifBtn').addEventListener('click', pushNotification);
+document.getElementById('loadNotifBtn').addEventListener('click', loadNotifications);
+document.getElementById('healthBtn').addEventListener('click', checkHealth);
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const speakBtn = document.getElementById('speakBtn');

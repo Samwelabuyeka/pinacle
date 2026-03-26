@@ -19,6 +19,7 @@ def detect_capabilities(permissions: dict) -> dict:
         "offline_stt": _has_module("speech_recognition"),
         "offline_tts": _has_module("pyttsx3"),
         "device_search": permissions.get("device_search", False),
+        "notification_read": permissions.get("notification_read", False),
         "reminders": True,
         "task_automation": True,
         "call_management": os_name in {"android", "ios"} and permissions.get("make_calls", False),

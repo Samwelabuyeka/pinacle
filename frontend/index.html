@@ -31,6 +31,7 @@
         <label><input type="checkbox" id="perm_always_mic"> Always mic</label>
         <label><input type="checkbox" id="perm_always_speaker"> Always speaker</label>
         <label><input type="checkbox" id="perm_os_level_control"> OS-level control</label>
+        <label><input type="checkbox" id="perm_notification_read"> Notification readout</label>
       </div>
       <div class="actions">
         <button id="loadPermsBtn">Load Permissions</button>
@@ -61,6 +62,23 @@
       <button id="searchBtn">Search Device</button>
     </section>
 
+
+
+    <section class="panel">
+      <h2>Notifications</h2>
+      <input id="notifTitle" placeholder="Notification title" />
+      <input id="notifBody" placeholder="Notification body" />
+      <div class="actions">
+        <button id="pushNotifBtn">Push Notification</button>
+        <button id="loadNotifBtn">Load Notifications</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>System Health</h2>
+      <button id="healthBtn">Check Health</button>
+      <pre id="healthOut">(unknown)</pre>
+    </section>
 
     <section class="panel">
       <h2>Capabilities</h2>
