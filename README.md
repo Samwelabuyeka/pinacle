@@ -4,21 +4,27 @@
 
 You were right — the Microsoft project you asked for is **bitnet.cpp** (repo: `microsoft/BitNet`).
 
-### Run the installer
+### 1) Install bitnet.cpp
 
 ```bash
 ./scripts/install_microsoft_local_ai.sh
 ```
 
-### What it does
-
-1. Clones (or updates) `https://github.com/microsoft/BitNet` with submodules.
-2. Installs Python dependencies from `requirements.txt`.
-3. Verifies the install by running `setup_env.py -h`.
-
-### Optional next step (download model + prepare runtime)
+### 2) Make a private cloud (local private API)
 
 ```bash
-huggingface-cli download microsoft/BitNet-b1.58-2B-4T-gguf --local-dir "$HOME/bitnet.cpp/models/BitNet-b1.58-2B-4T"
-python "$HOME/bitnet.cpp/setup_env.py" -md "$HOME/bitnet.cpp/models/BitNet-b1.58-2B-4T" -q i2_s
+./scripts/make_private_cloud.sh
+$HOME/private-bitnet-cloud/start_private_cloud.sh
+```
+
+This private cloud API binds to `127.0.0.1` by default and requires an API key from `$HOME/private-bitnet-cloud/.env`.
+
+### Test call
+
+```bash
+source "$HOME/private-bitnet-cloud/.env"
+curl -s http://127.0.0.1:8080/generate \
+  -H "Authorization: Bearer $BITNET_CLOUD_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"prompt":"You are a helpful assistant","n_predict":32}'
 ```
