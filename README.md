@@ -2,13 +2,21 @@
 
 ## Maya assistant on top of Microsoft bitnet.cpp + OVOS ecosystem
 
-Maya is now structured to integrate with:
+Maya is structured around reusable components from:
 - OVOS
 - HiveMind
 - whisper.cpp
 - piper
 - openWakeWord
 - Home Assistant
+
+### 0) Bootstrap dependency repos from GitHub
+
+```bash
+./scripts/bootstrap_maya_stack.sh
+```
+
+This downloads source repos so you can strip/rename/reuse only what your target device build needs.
 
 ### 1) Install core
 
@@ -32,15 +40,16 @@ python scripts/maya_daemon.py --interval 10
 ```
 
 ### Powerful behavior added
-- Personality engine with learning events + proactive suggestions (`/events`, `/suggestions`)
+- Capability detection (`/capabilities`) so Maya knows what she can do on the current device
+- Personality engine + proactive suggestions (`/events`, `/suggestions`)
+- Reminders API (`/reminders`) plus organism reminder processing
 - Privacy-guarded device search (`/device_search`) with allowlisted directories only
 - Permission controls for always mic/speaker + device search + phone-off execution
-- Persistent memory and task processing loop
 
 ### Privacy defense
 - Explicit permission gates on sensitive capabilities
 - API key auth
-- filesystem search restricted to user-safe roots (Documents/Downloads/Desktop)
+- filesystem search restricted to safe roots (Documents/Downloads/Desktop)
 
 ### Platform boundary
-Deep Apple-private Siri privileges are not available to third-party code, but this stack is designed to deliver a powerful Siri-like daily assistant experience across platforms with strong privacy controls.
+Deep Apple-private Siri privileges and full telephony delegation are not available to third-party code everywhere. This stack is built to get as close as possible across platforms with strong privacy controls.

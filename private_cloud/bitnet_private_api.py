@@ -12,6 +12,7 @@ if str(ROOT) not in sys.path:
 
 from maya_core.personality import PersonalityEngine
 from maya_core.privacy_guard import can_access_path, search_files
+from maya_core.capabilities import detect_capabilities
 
 HOST = os.environ.get("BITNET_CLOUD_HOST", "127.0.0.1")
 PORT = int(os.environ.get("BITNET_CLOUD_PORT", "8080"))
@@ -23,6 +24,7 @@ MODEL_PATH = os.environ.get(
 )
 PERM_FILE = Path(os.environ.get("MAYA_PERMISSIONS_FILE", os.path.expanduser("~/.maya_permissions.json")))
 TASK_FILE = Path(os.environ.get("MAYA_TASK_FILE", os.path.expanduser("~/.maya_tasks.json")))
+REMINDER_FILE = Path(os.environ.get("MAYA_REMINDER_FILE", os.path.expanduser("~/.maya_reminders.json")))
 
 DEFAULT_PERMISSIONS = {
     "ai_chat": True,
@@ -82,8 +84,12 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, {"permissions": get_permissions()})
         if self.path == "/tasks":
             return self._send(200, {"tasks": read_json(TASK_FILE, [])})
+        if self.path == "/reminders":
+            return self._send(200, {"reminders": read_json(REMINDER_FILE, [])})
         if self.path == "/suggestions":
             return self._send(200, {"suggestions": PERSONA.suggestions()})
+        if self.path == "/capabilities":
+            return self._send(200, {"capabilities": detect_capabilities(get_permissions())})
         return self._send(404, {"error": "not_found"})
 
     def do_POST(self):
@@ -115,6 +121,19 @@ class Handler(BaseHTTPRequestHandler):
             tasks.append(task)
             write_json(TASK_FILE, tasks)
             return self._send(200, {"task": task, "message": "Task queued"})
+
+        if self.path == "/reminders":
+            reminder = {
+                "title": data.get("title", "Reminder"),
+                "at": data.get("at", "unspecified"),
+                "note": data.get("note", ""),
+                "status": "scheduled",
+            }
+            reminders = read_json(REMINDER_FILE, [])
+            reminders.append(reminder)
+            write_json(REMINDER_FILE, reminders)
+            PERSONA.record_event("reminder_set", reminder["title"])
+            return self._send(200, {"reminder": reminder})
 
         if self.path == "/device_search":
             perms = get_permissions()

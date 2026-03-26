@@ -1,5 +1,6 @@
 const outputEl = document.getElementById('output');
 const suggestionsEl = document.getElementById('suggestions');
+const capabilitiesEl = document.getElementById('capabilities');
 const apiBaseEl = document.getElementById('apiBase');
 const apiKeyEl = document.getElementById('apiKey');
 const promptEl = document.getElementById('prompt');
@@ -43,6 +44,23 @@ async function savePerms() {
   outputEl.textContent = 'Permissions saved.';
 }
 
+
+async function getCapabilities() {
+  const r = await fetch(api('/capabilities'), { headers: headers() });
+  const data = await r.json();
+  capabilitiesEl.textContent = JSON.stringify(data.capabilities || data, null, 2);
+}
+
+async function setReminder() {
+  const title = document.getElementById('reminderTitle').value.trim() || 'Reminder';
+  const at = document.getElementById('reminderAt').value.trim() || 'unspecified';
+  const r = await fetch(api('/reminders'), {
+    method: 'POST', headers: headers(), body: JSON.stringify({ title, at }),
+  });
+  const data = await r.json();
+  outputEl.textContent = JSON.stringify(data, null, 2);
+}
+
 async function getSuggestions() {
   const r = await fetch(api('/suggestions'), { headers: headers() });
   const data = await r.json();
@@ -82,6 +100,8 @@ document.getElementById('savePermsBtn').addEventListener('click', savePerms);
 document.getElementById('sendBtn').addEventListener('click', askAssistant);
 document.getElementById('searchBtn').addEventListener('click', searchDevice);
 document.getElementById('suggestionsBtn').addEventListener('click', getSuggestions);
+document.getElementById('capabilitiesBtn').addEventListener('click', getCapabilities);
+document.getElementById('setReminderBtn').addEventListener('click', setReminder);
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const speakBtn = document.getElementById('speakBtn');
