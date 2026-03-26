@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Private Phone Assistant</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <main class="app">
+    <h1>Private Assistant</h1>
+    <p class="sub">Siri-style voice UX for your local BitNet API.</p>
+
+    <section class="panel">
+      <label>API URL</label>
+      <input id="apiUrl" value="http://127.0.0.1:8080/generate" />
+
+      <label>API Key</label>
+      <input id="apiKey" type="password" placeholder="BITNET_CLOUD_API_KEY" />
+
+      <label>Prompt</label>
+      <textarea id="prompt" rows="4" placeholder="Ask something..."></textarea>
+
+      <div class="actions">
+        <button id="speakBtn">🎙️ Speak</button>
+        <button id="sendBtn">Send</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Assistant Response</h2>
+      <pre id="output">(waiting)</pre>
+    </section>
+
+    <p class="note">
+      Security note: this app runs locally and cannot/does not grant Siri's OS-level privileges
+      (calls, SMS, contacts, system settings). It only accesses your configured local API.
+    </p>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>

@@ -21,7 +21,19 @@ $HOME/private-bitnet-cloud/start_private_cloud.sh
 
 This private cloud API binds to `127.0.0.1` by default and requires an API key from `$HOME/private-bitnet-cloud/.env`.
 
-### 3) Try talking to the AI
+### 3) Siri-style frontend (voice + speech back)
+
+```bash
+python -m http.server 4173
+# open http://127.0.0.1:4173/frontend/
+```
+
+The frontend in `frontend/` supports microphone input and spoken responses in-browser.
+
+> Important: no web app can grant true Siri OS-level privileges (phone calls, SMS, contacts, system settings)
+> without platform-native permissions and Apple private integrations. This project provides a private local assistant UI/API only.
+
+### 4) Try talking to the AI from terminal
 
 ```bash
 ./scripts/talk_to_ai.sh "Hello BitNet"
