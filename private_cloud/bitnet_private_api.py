@@ -54,7 +54,7 @@ class Handler(BaseHTTPRequestHandler):
         ]
 
         try:
-            proc = subprocess.run(cmd, capture_output=True, text=True, check=True)
+            proc = subprocess.run(cmd, capture_output=True, text=True, check=True, cwd=BITNET_DIR)
             return self._send(200, {"output": proc.stdout.strip()})
         except subprocess.CalledProcessError as exc:
             return self._send(500, {"error": exc.stderr[-1000:]})

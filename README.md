@@ -4,11 +4,13 @@
 
 You were right — the Microsoft project you asked for is **bitnet.cpp** (repo: `microsoft/BitNet`).
 
-### 1) Install bitnet.cpp
+### 1) Install bitnet.cpp + build the binary
 
 ```bash
 ./scripts/install_microsoft_local_ai.sh
 ```
+
+This builds `~/bitnet.cpp/build/bin/llama-cli` automatically.
 
 ### 2) Make a private cloud (local private API)
 
@@ -25,7 +27,7 @@ This private cloud API binds to `127.0.0.1` by default and requires an API key f
 ./scripts/talk_to_ai.sh "Hello BitNet"
 ```
 
-If you see `missing_binary` or `missing_model`, finish BitNet runtime setup first:
+If you see `missing_model`, download a real BitNet model and prepare it:
 
 ```bash
 huggingface-cli download microsoft/BitNet-b1.58-2B-4T-gguf --local-dir "$HOME/bitnet.cpp/models/BitNet-b1.58-2B-4T"
