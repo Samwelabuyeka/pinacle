@@ -2,7 +2,7 @@
 
 ## Install Microsoft bitnet.cpp (local AI inference)
 
-You were right — the Microsoft project you asked for is **bitnet.cpp** (repo: `microsoft/BitNet`).
+This project runs **Maya**, a Siri-style assistant UX on top of `microsoft/BitNet`.
 
 ### 1) Install bitnet.cpp + build the binary
 
@@ -10,38 +10,36 @@ You were right — the Microsoft project you asked for is **bitnet.cpp** (repo: 
 ./scripts/install_microsoft_local_ai.sh
 ```
 
-This builds `~/bitnet.cpp/build/bin/llama-cli` automatically.
+Installer behavior:
+- builds `~/bitnet.cpp/build/bin/llama-cli`
+- asks for permissions during install in interactive shells
+- stores permissions in `~/.maya_permissions.json`
 
-### 2) Make a private cloud (local private API)
+### 2) Start private cloud API
 
 ```bash
 ./scripts/make_private_cloud.sh
 $HOME/private-bitnet-cloud/start_private_cloud.sh
 ```
 
-This private cloud API binds to `127.0.0.1` by default and requires an API key from `$HOME/private-bitnet-cloud/.env`.
-
-### 3) Siri-style frontend (voice + speech back)
+### 3) Open frontend and manage permissions
 
 ```bash
 python -m http.server 4173
 # open http://127.0.0.1:4173/frontend/
 ```
 
-The frontend in `frontend/` supports microphone input and spoken responses in-browser.
+Frontend capabilities:
+- voice input + spoken responses
+- permission management (`/permissions` API)
+- task queueing (`/tasks` API)
+- toggle `run_when_phone_off` for cloud-mode task execution policy
 
-> Important: no web app can grant true Siri OS-level privileges (phone calls, SMS, contacts, system settings)
-> without platform-native permissions and Apple private integrations. This project provides a private local assistant UI/API only.
-
-### 4) Try talking to the AI from terminal
-
-```bash
-./scripts/talk_to_ai.sh "Hello BitNet"
-```
-
-If you see `missing_model`, download a real BitNet model and prepare it:
+### 4) Talk from terminal
 
 ```bash
-huggingface-cli download microsoft/BitNet-b1.58-2B-4T-gguf --local-dir "$HOME/bitnet.cpp/models/BitNet-b1.58-2B-4T"
-python "$HOME/bitnet.cpp/setup_env.py" -md "$HOME/bitnet.cpp/models/BitNet-b1.58-2B-4T" -q i2_s
+./scripts/talk_to_ai.sh "Hello Maya"
 ```
+
+### Important platform note
+A web app cannot grant Apple's private Siri OS privileges. This implementation provides install-time permission prompts + editable permission settings in the frontend for your own local/cloud stack.

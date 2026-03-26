@@ -4,6 +4,7 @@ set -euo pipefail
 BITNET_DIR="${BITNET_DIR:-$HOME/bitnet.cpp}"
 MODEL_DIR="$BITNET_DIR/models/BitNet-b1.58-2B-4T"
 GGUF_PATH="$MODEL_DIR/ggml-model-i2_s.gguf"
+PERM_FILE="${MAYA_PERMISSIONS_FILE:-$HOME/.maya_permissions.json}"
 
 if [ ! -d "$BITNET_DIR/.git" ]; then
   git clone --recursive https://github.com/microsoft/BitNet "$BITNET_DIR"
@@ -36,5 +37,49 @@ fi
   python setup_env.py -md "$MODEL_DIR" -q i2_s
 )
 
+# Permission prompts at install (interactive TTY only).
+if [ -t 0 ]; then
+  python - <<'PY'
+import json
+from pathlib import Path
+
+perm_file = Path.home() / '.maya_permissions.json'
+def ask(name, default=False):
+    hint = 'Y/n' if default else 'y/N'
+    value = input(f'Grant permission `{name}`? [{hint}] ').strip().lower()
+    if not value:
+        return default
+    return value in {'y','yes'}
+
+perms = {
+    'ai_chat': True,
+    'send_sms': ask('send_sms'),
+    'make_calls': ask('make_calls'),
+    'manage_calendar': ask('manage_calendar'),
+    'location_access': ask('location_access'),
+    'run_when_phone_off': ask('run_when_phone_off'),
+}
+perm_file.write_text(json.dumps(perms, indent=2))
+print(f'Permissions saved: {perm_file}')
+PY
+else
+  python - <<'PY'
+import json
+from pathlib import Path
+perm_file = Path.home() / '.maya_permissions.json'
+if not perm_file.exists():
+    perm_file.write_text(json.dumps({
+        'ai_chat': True,
+        'send_sms': False,
+        'make_calls': False,
+        'manage_calendar': False,
+        'location_access': False,
+        'run_when_phone_off': False,
+    }, indent=2))
+print(f'Permissions file ready: {perm_file}')
+PY
+fi
+
 echo "bitnet.cpp installed and binary built at: $BITNET_DIR/build/bin/llama-cli"
+echo "Permission settings: $PERM_FILE (editable from frontend too)."
 echo "Next step: replace placeholder model with a real one, then run inference."

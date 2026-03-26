@@ -3,6 +3,7 @@ import json
 import os
 import subprocess
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from pathlib import Path
 
 HOST = os.environ.get("BITNET_CLOUD_HOST", "127.0.0.1")
 PORT = int(os.environ.get("BITNET_CLOUD_PORT", "8080"))
@@ -12,6 +13,38 @@ MODEL_PATH = os.environ.get(
     "BITNET_MODEL",
     os.path.join(BITNET_DIR, "models/BitNet-b1.58-2B-4T/ggml-model-i2_s.gguf"),
 )
+PERM_FILE = Path(os.environ.get("MAYA_PERMISSIONS_FILE", os.path.expanduser("~/.maya_permissions.json")))
+TASK_FILE = Path(os.environ.get("MAYA_TASK_FILE", os.path.expanduser("~/.maya_tasks.json")))
+
+DEFAULT_PERMISSIONS = {
+    "ai_chat": True,
+    "send_sms": False,
+    "make_calls": False,
+    "manage_calendar": False,
+    "location_access": False,
+    "run_when_phone_off": False,
+}
+
+
+def read_json(path: Path, default):
+    if not path.exists():
+        return default
+    try:
+        return json.loads(path.read_text())
+    except Exception:
+        return default
+
+
+def write_json(path: Path, value):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(value, indent=2))
+
+
+def get_permissions():
+    perms = read_json(PERM_FILE, DEFAULT_PERMISSIONS.copy())
+    for key, value in DEFAULT_PERMISSIONS.items():
+        perms.setdefault(key, value)
+    return perms
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -23,15 +56,54 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
-    def do_POST(self):
-        if self.path != "/generate":
-            return self._send(404, {"error": "not_found"})
-
+    def _auth(self):
         if API_KEY and self.headers.get("Authorization") != f"Bearer {API_KEY}":
-            return self._send(401, {"error": "unauthorized"})
+            self._send(401, {"error": "unauthorized"})
+            return False
+        return True
+
+    def do_GET(self):
+        if not self._auth():
+            return
+        if self.path == "/permissions":
+            return self._send(200, {"permissions": get_permissions()})
+        if self.path == "/tasks":
+            return self._send(200, {"tasks": read_json(TASK_FILE, [])})
+        return self._send(404, {"error": "not_found"})
+
+    def do_POST(self):
+        if not self._auth():
+            return
 
         length = int(self.headers.get("Content-Length", "0"))
         data = json.loads(self.rfile.read(length) or b"{}")
+
+        if self.path == "/permissions":
+            current = get_permissions()
+            for key in DEFAULT_PERMISSIONS:
+                if key in data and isinstance(data[key], bool):
+                    current[key] = data[key]
+            write_json(PERM_FILE, current)
+            return self._send(200, {"permissions": current})
+
+        if self.path == "/tasks":
+            task = {
+                "title": data.get("title", "Untitled task"),
+                "details": data.get("details", ""),
+                "mode": "cloud" if get_permissions().get("run_when_phone_off") else "device-only",
+            }
+            tasks = read_json(TASK_FILE, [])
+            tasks.append(task)
+            write_json(TASK_FILE, tasks)
+            return self._send(200, {"task": task, "message": "Task queued"})
+
+        if self.path != "/generate":
+            return self._send(404, {"error": "not_found"})
+
+        perms = get_permissions()
+        if not perms.get("ai_chat"):
+            return self._send(403, {"error": "permission_denied: ai_chat"})
+
         prompt = data.get("prompt")
         if not prompt:
             return self._send(400, {"error": "prompt_required"})
@@ -63,6 +135,7 @@ class Handler(BaseHTTPRequestHandler):
 def main():
     if not API_KEY:
         raise SystemExit("BITNET_CLOUD_API_KEY must be set")
+    write_json(PERM_FILE, get_permissions())
     HTTPServer((HOST, PORT), Handler).serve_forever()
 
 
