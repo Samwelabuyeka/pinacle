@@ -2,8 +2,8 @@
 
 ## Maya assistant on top of Microsoft bitnet.cpp
 
-You asked for a true Siri. A true Siri clone is not possible outside Apple private OS integrations.
-What this repo gives you is the closest practical equivalent: an offline-capable local assistant with voice, local inference, and configurable permissions.
+You want Maya to feel like a living organism, always active, speaking, remembering, and handling tasks.
+This repo now includes an **organism loop** (continuous daemon + memory + task execution) in addition to the frontend/API.
 
 ### 1) Install bitnet.cpp + build binary
 
@@ -11,7 +11,7 @@ What this repo gives you is the closest practical equivalent: an offline-capable
 ./scripts/install_microsoft_local_ai.sh
 ```
 
-### 2) Optional private-cloud API + frontend
+### 2) Start private cloud API + frontend
 
 ```bash
 ./scripts/make_private_cloud.sh
@@ -20,15 +20,30 @@ python -m http.server 4173
 # open http://127.0.0.1:4173/frontend/
 ```
 
-### 3) Offline talking mode (local)
+### 3) Start Maya organism mode (always-on loop)
+
+```bash
+python scripts/maya_daemon.py --interval 10
+```
+
+One-cycle dry run:
+
+```bash
+python scripts/maya_daemon.py --once
+```
+
+### 4) Offline talking mode
 
 ```bash
 python scripts/maya_offline_voice.py --text-only
-# or single prompt:
-python scripts/maya_offline_voice.py --once "Hello Maya" --text-only
 ```
 
-This uses local BitNet inference only (no cloud required if model is local).
+### What this adds
+- long-running agent loop
+- persistent memory (`~/.maya_memory.db`)
+- background task execution from `~/.maya_tasks.json`
+- local BitNet inference path
 
-### Hard limit
-Apple Siri system privileges (deep phone controls) are not available to third-party local scripts/web apps.
+### Hard platform boundary
+Apple private Siri system APIs are not available to third-party code.
+This stack provides the closest equivalent behavior on your own infrastructure (local + private cloud + persistent agent loop).
