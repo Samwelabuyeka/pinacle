@@ -41,6 +41,7 @@ python scripts/maya_daemon.py --interval 10
 - Capability detection (`/capabilities`) so Maya knows what she can do
 - Full capability matrix (`/capability_matrix`) for Siri-like feature parity tracking
 - Personality engine + proactive suggestions (`/events`, `/suggestions`)
+- Context engine with anti-mishear clarification (`/context`, confirmation flow on low confidence)
 - Reminders API (`/reminders`) + organism reminder processing
 - Privacy-guarded device search (`/device_search`) with allowlisted paths
 - OS action interface (`/os_action`) guarded by `os_level_control` permission

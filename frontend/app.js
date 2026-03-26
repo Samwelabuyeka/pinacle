@@ -3,6 +3,7 @@ const suggestionsEl = document.getElementById('suggestions');
 const capabilitiesEl = document.getElementById('capabilities');
 const healthEl = document.getElementById('healthOut');
 const matrixEl = document.getElementById('matrixOut');
+const contextEl = document.getElementById('contextOut');
 const apiBaseEl = document.getElementById('apiBase');
 const apiKeyEl = document.getElementById('apiKey');
 const promptEl = document.getElementById('prompt');
@@ -55,12 +56,30 @@ async function pushNotification() {
     method: 'POST', headers: headers(), body: JSON.stringify({ title, body }),
   });
   const data = await r.json();
+  if (r.status === 409 && data.clarification_required) {
+    outputEl.textContent = data.message + " Click Run OS Action again to confirm.";
+    const rr = await fetch(api('/os_action'), {
+      method: "POST", headers: headers(), body: JSON.stringify({ action, confirmed: true }),
+    });
+    const dd = await rr.json();
+    outputEl.textContent += "\nConfirmed result: " + JSON.stringify(dd);
+    return;
+  }
   outputEl.textContent = JSON.stringify(data, null, 2);
 }
 
 async function loadNotifications() {
   const r = await fetch(api('/notifications'), { headers: headers() });
   const data = await r.json();
+  if (r.status === 409 && data.clarification_required) {
+    outputEl.textContent = data.message + " Click Run OS Action again to confirm.";
+    const rr = await fetch(api('/os_action'), {
+      method: "POST", headers: headers(), body: JSON.stringify({ action, confirmed: true }),
+    });
+    const dd = await rr.json();
+    outputEl.textContent += "\nConfirmed result: " + JSON.stringify(dd);
+    return;
+  }
   outputEl.textContent = JSON.stringify(data, null, 2);
 }
 
@@ -70,6 +89,13 @@ async function checkHealth() {
   healthEl.textContent = JSON.stringify(data, null, 2);
 }
 
+
+
+async function loadContext() {
+  const r = await fetch(api('/context'), { headers: headers() });
+  const data = await r.json();
+  contextEl.textContent = data.recent || JSON.stringify(data, null, 2);
+}
 
 async function loadCapabilityMatrix() {
   const r = await fetch(api('/capability_matrix'), { headers: headers() });
@@ -90,6 +116,15 @@ async function setReminder() {
     method: 'POST', headers: headers(), body: JSON.stringify({ title, at }),
   });
   const data = await r.json();
+  if (r.status === 409 && data.clarification_required) {
+    outputEl.textContent = data.message + " Click Run OS Action again to confirm.";
+    const rr = await fetch(api('/os_action'), {
+      method: "POST", headers: headers(), body: JSON.stringify({ action, confirmed: true }),
+    });
+    const dd = await rr.json();
+    outputEl.textContent += "\nConfirmed result: " + JSON.stringify(dd);
+    return;
+  }
   outputEl.textContent = JSON.stringify(data, null, 2);
 }
 
@@ -106,6 +141,15 @@ async function runOsAction() {
     method: 'POST', headers: headers(), body: JSON.stringify({ action }),
   });
   const data = await r.json();
+  if (r.status === 409 && data.clarification_required) {
+    outputEl.textContent = data.message + " Click Run OS Action again to confirm.";
+    const rr = await fetch(api('/os_action'), {
+      method: "POST", headers: headers(), body: JSON.stringify({ action, confirmed: true }),
+    });
+    const dd = await rr.json();
+    outputEl.textContent += "\nConfirmed result: " + JSON.stringify(dd);
+    return;
+  }
   outputEl.textContent = JSON.stringify(data, null, 2);
 }
 
@@ -116,6 +160,15 @@ async function searchDevice() {
     method: 'POST', headers: headers(), body: JSON.stringify({ base_path: base, query }),
   });
   const data = await r.json();
+  if (r.status === 409 && data.clarification_required) {
+    outputEl.textContent = data.message + " Click Run OS Action again to confirm.";
+    const rr = await fetch(api('/os_action'), {
+      method: "POST", headers: headers(), body: JSON.stringify({ action, confirmed: true }),
+    });
+    const dd = await rr.json();
+    outputEl.textContent += "\nConfirmed result: " + JSON.stringify(dd);
+    return;
+  }
   outputEl.textContent = JSON.stringify(data, null, 2);
 }
 
@@ -128,6 +181,16 @@ async function askAssistant() {
     method: 'POST', headers: headers(), body: JSON.stringify({ prompt, n_predict: 64 }),
   });
   const data = await resp.json();
+  if (resp.status === 409 && data.clarification_required) {
+    outputEl.textContent = data.message + " Resending with confirmation...";
+    const r2 = await fetch(api('/generate'), {
+      method: "POST", headers: headers(), body: JSON.stringify({ prompt, n_predict: 64, confirmed: true }),
+    });
+    const d2 = await r2.json();
+    const t2 = d2.output || d2.error || JSON.stringify(d2);
+    outputEl.textContent = t2;
+    return;
+  }
   const text = data.output || data.error || JSON.stringify(data);
   outputEl.textContent = text;
   if (data.suggestions) suggestionsEl.textContent = JSON.stringify(data.suggestions, null, 2);
@@ -149,6 +212,7 @@ document.getElementById('pushNotifBtn').addEventListener('click', pushNotificati
 document.getElementById('loadNotifBtn').addEventListener('click', loadNotifications);
 document.getElementById('healthBtn').addEventListener('click', checkHealth);
 document.getElementById('matrixBtn').addEventListener('click', loadCapabilityMatrix);
+document.getElementById('contextBtn').addEventListener('click', loadContext);
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const speakBtn = document.getElementById('speakBtn');

@@ -14,6 +14,7 @@ from maya_core.personality import PersonalityEngine
 from maya_core.privacy_guard import can_access_path, search_files
 from maya_core.capabilities import detect_capabilities
 from maya_core.os_bridge import OSBridge
+from maya_core.context_engine import ContextEngine
 
 HOST = os.environ.get("BITNET_CLOUD_HOST", "127.0.0.1")
 PORT = int(os.environ.get("BITNET_CLOUD_PORT", "8080"))
@@ -44,6 +45,7 @@ DEFAULT_PERMISSIONS = {
 
 PERSONA = PersonalityEngine()
 OSB = OSBridge()
+CTX = ContextEngine()
 
 REF_FILE = ROOT / "config" / "siri_capabilities_reference.json"
 if REF_FILE.exists():
@@ -113,6 +115,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, {"notifications": read_json(NOTIF_FILE, [])})
         if self.path == "/capability_matrix":
             return self._send(200, {"capabilities": MAYA_CAPABILITY_MATRIX})
+        if self.path == "/context":
+            return self._send(200, {"recent": CTX.recent_summary()})
         if self.path == "/health":
             health = {
                 "bitnet_dir": os.path.exists(BITNET_DIR),
@@ -185,7 +189,12 @@ class Handler(BaseHTTPRequestHandler):
             if not perms.get("os_level_control"):
                 return self._send(403, {"error": "permission_denied: os_level_control"})
             action = data.get("action", "")
-            return self._send(200, OSB.run_action(action, data))
+            needs, msg = CTX.clarification_needed(action, action_sensitive=True)
+            if needs and not data.get("confirmed", False):
+                return self._send(409, {"clarification_required": True, "message": msg})
+            result = OSB.run_action(action, data)
+            CTX.add_turn(f"os_action:{action}", str(result))
+            return self._send(200, result)
 
         if self.path == "/device_search":
             perms = get_permissions()
@@ -209,6 +218,9 @@ class Handler(BaseHTTPRequestHandler):
         prompt = data.get("prompt")
         if not prompt:
             return self._send(400, {"error": "prompt_required"})
+        needs, msg = CTX.clarification_needed(prompt, action_sensitive=False)
+        if needs and not data.get("confirmed", False):
+            return self._send(409, {"clarification_required": True, "message": msg})
 
         llama_cli = os.path.join(BITNET_DIR, "build/bin/llama-cli")
         if not os.path.exists(llama_cli):
@@ -216,20 +228,23 @@ class Handler(BaseHTTPRequestHandler):
         if not os.path.exists(MODEL_PATH):
             return self._send(503, {"error": f"missing_model: {MODEL_PATH}. Download model and run setup_env.py."})
 
+        contextual_prompt = f"Recent context:\n{CTX.recent_summary()}\n\nUser request:\n{prompt}"
         cmd = [
             "python",
             os.path.join(BITNET_DIR, "run_inference.py"),
             "-m",
             MODEL_PATH,
             "-p",
-            prompt,
+            contextual_prompt,
             "-n",
             str(data.get("n_predict", 64)),
         ]
 
         try:
             proc = subprocess.run(cmd, capture_output=True, text=True, check=True, cwd=BITNET_DIR)
-            return self._send(200, {"output": proc.stdout.strip(), "suggestions": PERSONA.suggestions()})
+            out = proc.stdout.strip()
+            CTX.add_turn(prompt, out)
+            return self._send(200, {"output": out, "suggestions": PERSONA.suggestions()})
         except subprocess.CalledProcessError as exc:
             return self._send(500, {"error": exc.stderr[-1000:]})
 
