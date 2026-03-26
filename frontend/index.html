@@ -30,6 +30,7 @@
         <label><input type="checkbox" id="perm_device_search"> Device page/file search</label>
         <label><input type="checkbox" id="perm_always_mic"> Always mic</label>
         <label><input type="checkbox" id="perm_always_speaker"> Always speaker</label>
+        <label><input type="checkbox" id="perm_os_level_control"> OS-level control</label>
       </div>
       <div class="actions">
         <button id="loadPermsBtn">Load Permissions</button>
@@ -44,6 +45,13 @@
         <button id="speakBtn">🎙️ Speak</button>
         <button id="sendBtn">Send</button>
       </div>
+    </section>
+
+
+    <section class="panel">
+      <h2>OS Action (native plugin required)</h2>
+      <input id="osAction" value="answer_call_with_maya" />
+      <button id="runOsActionBtn">Run OS Action</button>
     </section>
 
     <section class="panel">

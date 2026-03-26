@@ -10,13 +10,11 @@ Maya is structured around reusable components from:
 - openWakeWord
 - Home Assistant
 
-### 0) Bootstrap dependency repos from GitHub
+### 0) Pull upstream repos (for strip/rename/reuse)
 
 ```bash
 ./scripts/bootstrap_maya_stack.sh
 ```
-
-This downloads source repos so you can strip/rename/reuse only what your target device build needs.
 
 ### 1) Install core
 
@@ -39,17 +37,18 @@ python -m http.server 4173
 python scripts/maya_daemon.py --interval 10
 ```
 
-### Powerful behavior added
-- Capability detection (`/capabilities`) so Maya knows what she can do on the current device
+### Core features for “next Siri” direction
+- Capability detection (`/capabilities`) so Maya knows what she can do
 - Personality engine + proactive suggestions (`/events`, `/suggestions`)
-- Reminders API (`/reminders`) plus organism reminder processing
-- Privacy-guarded device search (`/device_search`) with allowlisted directories only
+- Reminders API (`/reminders`) + organism reminder processing
+- Privacy-guarded device search (`/device_search`) with allowlisted paths
+- OS action interface (`/os_action`) guarded by `os_level_control` permission
 - Permission controls for always mic/speaker + device search + phone-off execution
 
 ### Privacy defense
-- Explicit permission gates on sensitive capabilities
+- explicit permission gates on sensitive capabilities
 - API key auth
 - filesystem search restricted to safe roots (Documents/Downloads/Desktop)
 
 ### Platform boundary
-Deep Apple-private Siri privileges and full telephony delegation are not available to third-party code everywhere. This stack is built to get as close as possible across platforms with strong privacy controls.
+Deep Siri-equivalent OS control requires native platform plugins (Android/iOS telephony/notification APIs). This repo includes the permissioned OS-action bridge interface and capability detection so those native plugins can be added safely per device.

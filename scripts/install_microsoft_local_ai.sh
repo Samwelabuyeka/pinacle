@@ -61,6 +61,7 @@ perms = {
     'device_search': ask('device_search'),
     'always_mic': ask('always_mic', default=True),
     'always_speaker': ask('always_speaker', default=True),
+    'os_level_control': ask('os_level_control'),
 }
 perm_file.write_text(json.dumps(perms, indent=2))
 print(f'Permissions saved: {perm_file}')
@@ -81,6 +82,7 @@ if not perm_file.exists():
         'device_search': False,
         'always_mic': True,
         'always_speaker': True,
+        'os_level_control': False,
     }, indent=2))
 print(f'Permissions file ready: {perm_file}')
 PY

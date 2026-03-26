@@ -7,7 +7,7 @@ const promptEl = document.getElementById('prompt');
 
 const permKeys = [
   'ai_chat', 'send_sms', 'make_calls', 'manage_calendar', 'location_access',
-  'run_when_phone_off', 'device_search', 'always_mic', 'always_speaker'
+  'run_when_phone_off', 'device_search', 'always_mic', 'always_speaker', 'os_level_control'
 ];
 
 const headers = () => ({
@@ -67,6 +67,16 @@ async function getSuggestions() {
   suggestionsEl.textContent = JSON.stringify(data.suggestions || data, null, 2);
 }
 
+
+async function runOsAction() {
+  const action = document.getElementById('osAction').value.trim();
+  const r = await fetch(api('/os_action'), {
+    method: 'POST', headers: headers(), body: JSON.stringify({ action }),
+  });
+  const data = await r.json();
+  outputEl.textContent = JSON.stringify(data, null, 2);
+}
+
 async function searchDevice() {
   const base = document.getElementById('searchBase').value.replace('$HOME', '~');
   const query = document.getElementById('searchQuery').value;
@@ -102,6 +112,7 @@ document.getElementById('searchBtn').addEventListener('click', searchDevice);
 document.getElementById('suggestionsBtn').addEventListener('click', getSuggestions);
 document.getElementById('capabilitiesBtn').addEventListener('click', getCapabilities);
 document.getElementById('setReminderBtn').addEventListener('click', setReminder);
+document.getElementById('runOsActionBtn').addEventListener('click', runOsAction);
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const speakBtn = document.getElementById('speakBtn');

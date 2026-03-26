@@ -13,6 +13,7 @@ if str(ROOT) not in sys.path:
 from maya_core.personality import PersonalityEngine
 from maya_core.privacy_guard import can_access_path, search_files
 from maya_core.capabilities import detect_capabilities
+from maya_core.os_bridge import OSBridge
 
 HOST = os.environ.get("BITNET_CLOUD_HOST", "127.0.0.1")
 PORT = int(os.environ.get("BITNET_CLOUD_PORT", "8080"))
@@ -36,9 +37,11 @@ DEFAULT_PERMISSIONS = {
     "device_search": False,
     "always_mic": True,
     "always_speaker": True,
+    "os_level_control": False,
 }
 
 PERSONA = PersonalityEngine()
+OSB = OSBridge()
 
 
 def read_json(path: Path, default):
@@ -134,6 +137,13 @@ class Handler(BaseHTTPRequestHandler):
             write_json(REMINDER_FILE, reminders)
             PERSONA.record_event("reminder_set", reminder["title"])
             return self._send(200, {"reminder": reminder})
+
+        if self.path == "/os_action":
+            perms = get_permissions()
+            if not perms.get("os_level_control"):
+                return self._send(403, {"error": "permission_denied: os_level_control"})
+            action = data.get("action", "")
+            return self._send(200, OSB.run_action(action, data))
 
         if self.path == "/device_search":
             perms = get_permissions()
