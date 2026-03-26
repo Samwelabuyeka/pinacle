@@ -1,21 +1,24 @@
 # pinacle the greates
 
-## Microsoft open-source local AI runtime
+## Install Microsoft bitnet.cpp (local AI inference)
 
-This repo now includes a runnable installer for **ONNX Runtime GenAI** (by Microsoft), which is used to run generative AI models locally.
+You were right — the Microsoft project you asked for is **bitnet.cpp** (repo: `microsoft/BitNet`).
 
-### Run the installation
+### Run the installer
 
 ```bash
 ./scripts/install_microsoft_local_ai.sh
 ```
 
-### What the script does
+### What it does
+
+1. Clones (or updates) `https://github.com/microsoft/BitNet` with submodules.
+2. Installs Python dependencies from `requirements.txt`.
+3. Verifies the install by running `setup_env.py -h`.
+
+### Optional next step (download model + prepare runtime)
 
 ```bash
-python -m pip install --user onnxruntime-genai
-python - <<'PY'
-import onnxruntime_genai as og
-print(f"onnxruntime-genai installed: {og.__version__}")
-PY
+huggingface-cli download microsoft/BitNet-b1.58-2B-4T-gguf --local-dir "$HOME/bitnet.cpp/models/BitNet-b1.58-2B-4T"
+python "$HOME/bitnet.cpp/setup_env.py" -md "$HOME/bitnet.cpp/models/BitNet-b1.58-2B-4T" -q i2_s
 ```
