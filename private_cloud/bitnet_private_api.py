@@ -45,16 +45,11 @@ DEFAULT_PERMISSIONS = {
 PERSONA = PersonalityEngine()
 OSB = OSBridge()
 
-SIRI_CAPABILITY_CATALOG = [
-    "make_and_receive_calls",
-    "send_and_read_messages",
-    "read_and_announce_notifications",
-    "set_reminders_and_alarms",
-    "calendar_management",
-    "app_launch_and_navigation",
-    "shortcuts_and_automations",
-    "contextual_suggestions",
-]
+REF_FILE = ROOT / "config" / "siri_capabilities_reference.json"
+if REF_FILE.exists():
+    SIRI_CAPABILITY_CATALOG = json.loads(REF_FILE.read_text()).get("capabilities", [])
+else:
+    SIRI_CAPABILITY_CATALOG = []
 
 
 def read_json(path: Path, default):
