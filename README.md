@@ -14,6 +14,7 @@ Maya is structured around reusable components from:
 
 ```bash
 ./scripts/bootstrap_maya_stack.sh
+./scripts/integrate_vendor_components.sh
 ```
 
 ### 1) Install core
@@ -42,6 +43,7 @@ python scripts/maya_daemon.py --interval 10
 - Full capability matrix (`/capability_matrix`) for Siri-like feature parity tracking
 - Personality engine + proactive suggestions (`/events`, `/suggestions`)
 - Context engine with anti-mishear clarification (`/context`, confirmation flow on low confidence)
+- Fallback responder if local model is unavailable/invalid (keeps API conversational without hard failure)
 - Reminders API (`/reminders`) + organism reminder processing
 - Privacy-guarded device search (`/device_search`) with allowlisted paths
 - OS action interface (`/os_action`) guarded by `os_level_control` permission
@@ -54,3 +56,6 @@ python scripts/maya_daemon.py --interval 10
 
 ### Platform boundary
 Deep Siri-equivalent OS control requires native platform plugins (Android/iOS telephony/notification APIs). This repo includes the permissioned OS-action bridge interface and capability detection so those native plugins can be added safely per device.
+
+
+Vendor components are unpacked into `integrations/vendor/` and referenced by shims in `integrations/`.
