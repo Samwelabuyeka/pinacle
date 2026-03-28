@@ -15,6 +15,7 @@ from maya_core.privacy_guard import can_access_path, search_files
 from maya_core.capabilities import detect_capabilities
 from maya_core.os_bridge import OSBridge
 from maya_core.context_engine import ContextEngine
+from maya_core.fallback_llm import generate_fallback
 
 HOST = os.environ.get("BITNET_CLOUD_HOST", "127.0.0.1")
 PORT = int(os.environ.get("BITNET_CLOUD_PORT", "8080"))
@@ -246,7 +247,9 @@ class Handler(BaseHTTPRequestHandler):
             CTX.add_turn(prompt, out)
             return self._send(200, {"output": out, "suggestions": PERSONA.suggestions()})
         except subprocess.CalledProcessError as exc:
-            return self._send(500, {"error": exc.stderr[-1000:]})
+            fb = generate_fallback(prompt)
+            CTX.add_turn(prompt, fb)
+            return self._send(200, {"output": fb, "fallback": True, "error": exc.stderr[-280:]})
 
 
 def main():
