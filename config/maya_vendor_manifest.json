@@ -1,0 +1,83 @@
+[
+  {
+    "name": "ovos-core",
+    "source": "OpenVoiceOS",
+    "reusable_for": [
+      "intent routing",
+      "service bus",
+      "assistant skills"
+    ],
+    "local_path": "C:\\Users\\Marlyne\\maya_vendor\\ovos-core",
+    "available": true
+  },
+  {
+    "name": "hivemind-core",
+    "source": "HiveMind",
+    "reusable_for": [
+      "agent mesh",
+      "message routing",
+      "delegation"
+    ],
+    "local_path": "C:\\Users\\Marlyne\\maya_vendor\\hivemind-core",
+    "available": true
+  },
+  {
+    "name": "whisper.cpp",
+    "source": "whisper.cpp",
+    "reusable_for": [
+      "offline speech recognition"
+    ],
+    "local_path": "C:\\Users\\Marlyne\\maya_vendor\\whisper.cpp",
+    "available": true
+  },
+  {
+    "name": "piper",
+    "source": "Piper",
+    "reusable_for": [
+      "offline speech synthesis"
+    ],
+    "local_path": "C:\\Users\\Marlyne\\maya_vendor\\piper",
+    "available": true
+  },
+  {
+    "name": "openWakeWord",
+    "source": "openWakeWord",
+    "reusable_for": [
+      "wake-word detection"
+    ],
+    "local_path": "C:\\Users\\Marlyne\\maya_vendor\\openWakeWord",
+    "available": true
+  },
+  {
+    "name": "home-assistant-core",
+    "source": "Home Assistant",
+    "reusable_for": [
+      "smart-home control",
+      "device automations"
+    ],
+    "local_path": "C:\\Users\\Marlyne\\maya_vendor\\home-assistant-core",
+    "available": true
+  },
+  {
+    "name": "mediapipe",
+    "source": "MediaPipe",
+    "reusable_for": [
+      "face detection",
+      "face landmarks",
+      "on-device vision privacy"
+    ],
+    "local_path": "C:\\Users\\Marlyne\\Documents\\New project\\pinacle\\vendor\\mediapipe",
+    "available": true
+  },
+  {
+    "name": "tensorflow-examples",
+    "source": "TensorFlow Examples",
+    "reusable_for": [
+      "small TFLite examples",
+      "audio embeddings",
+      "local model integration"
+    ],
+    "local_path": "C:\\Users\\Marlyne\\Documents\\New project\\pinacle\\vendor\\tensorflow-examples",
+    "available": true
+  }
+]

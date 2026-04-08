@@ -1,0 +1,22 @@
+{
+  "assistant_name": "Maya",
+  "product_goal": "offline_native_superassistant",
+  "wake_word_backend": "openWakeWord",
+  "speech_to_text_backend": "whisper.cpp",
+  "text_to_speech_backend": "piper",
+  "primary_llm_backend": "MLC LLM Android",
+  "heavy_llm_backend": "Microsoft BitNet",
+  "phone_llm_profile": "Qwen3-4B-Instruct-MLC",
+  "heavy_llm_profile": "Mixtral-8x7B-Instruct-GGUF-or-BitNet-heavy-fallback",
+  "routing_strategy": "phone_primary_heavy_escalation",
+  "vendor_reuse_targets": [
+    "ovos-core",
+    "hivemind-core",
+    "whisper.cpp",
+    "piper",
+    "openWakeWord",
+    "home-assistant-core"
+  ],
+  "device_target": "android_phone_hyperos_capable",
+  "capability_target": "assistant_role_plus_accessibility_plus_notification_listener_plus_oem_bridge"
+}

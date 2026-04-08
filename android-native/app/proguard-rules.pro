@@ -1,0 +1,1 @@
+# Native assistant bootstrap rules.

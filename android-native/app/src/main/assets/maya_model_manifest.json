@@ -1,0 +1,38 @@
+{
+  "assistant": "Maya",
+  "routingStrategy": "phone_primary_heavy_escalation",
+  "profiles": [
+    {
+      "id": "maya-phone-qwen3-4b",
+      "role": "primary_phone_model",
+      "runtime": "MLC",
+      "model": "Qwen3-4B-Instruct",
+      "quantization": "q4f16_1",
+      "target": "android_phone",
+      "notes": "Fast offline phone model for everyday assistant requests."
+    },
+    {
+      "id": "maya-heavy-mixtral-8x7b",
+      "role": "heavy_reasoning_model",
+      "runtime": "GGUF_CPP",
+      "model": "Mixtral-8x7B-Instruct",
+      "quantization": "Q4_K_M",
+      "target": "large_ram_android_or_companion_device",
+      "notes": "Escalation path for complex reasoning where hardware allows it."
+    },
+    {
+      "id": "maya-local-bitnet-2b",
+      "role": "local_cpu_fallback",
+      "runtime": "BITNET",
+      "model": "BitNet-b1.58-2B-4T",
+      "quantization": "i2_s",
+      "target": "cpu_fallback",
+      "notes": "Fallback local runtime already present in this workspace."
+    }
+  ],
+  "voice": {
+    "profileId": "maya-premium-female-en",
+    "backend": "piper_high_quality_female",
+    "style": "warm_confident_expressive"
+  }
+}

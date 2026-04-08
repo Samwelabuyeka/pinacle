@@ -1,61 +1,83 @@
-# pinacle the greates
+# pinacle
 
-## Maya assistant on top of Microsoft bitnet.cpp + OVOS ecosystem
+## Maya offline-native assistant
+
+This repository is now aimed at a phone-first, offline-capable assistant rather than a web product.
 
 Maya is structured around reusable components from:
+
 - OVOS
 - HiveMind
 - whisper.cpp
 - piper
 - openWakeWord
 - Home Assistant
+- Microsoft BitNet
+- MediaPipe
+- TensorFlow Examples
 
-### 0) Pull upstream repos (for strip/rename/reuse)
+## Native-first layout
+
+- `android-native/` Kotlin Android shell for on-device assistant behavior
+- `maya_core/` capability, context, privacy, personality, and fallback logic
+- `private_cloud/` local/private model API components
+- `integrations/` vendor shims and adapters
+- `docs/OFFLINE_NATIVE_ROADMAP.md` phone-first roadmap
+- `docs/NATIVE_ASSISTANT_STACK.md` end-state runtime architecture
+- `config/maya_runtime_profile.json` Maya runtime priorities and target device profile
+
+## Upstream bootstrap
 
 ```bash
 ./scripts/bootstrap_maya_stack.sh
 ./scripts/integrate_vendor_components.sh
-```
-
-### 1) Install core
-
-```bash
 ./scripts/install_microsoft_local_ai.sh
 ```
 
-### 2) Start private API + frontend
+On Windows, BitNet bootstrap can be driven from:
 
-```bash
-./scripts/make_private_cloud.sh
-$HOME/private-bitnet-cloud/start_private_cloud.sh
-python -m http.server 4173
-# open http://127.0.0.1:4173/frontend/
+```powershell
+.\scripts\setup_bitnet_windows.ps1
+.\scripts\download_bitnet_model.ps1
 ```
 
-### 3) Start organism loop
+## Local Maya runner
 
-```bash
-python scripts/maya_daemon.py --interval 10
+The local desktop and dev runner is wired to the real BitNet install with a quality gate:
+
+```powershell
+.\scripts\run_maya_local.ps1
+python .\scripts\maya_offline_voice.py --status
+python .\scripts\maya_offline_voice.py --once "What can you do?" --text-only
 ```
 
-### Core features for “next Siri” direction
-- Capability detection (`/capabilities`) so Maya knows what she can do
-- Full capability matrix (`/capability_matrix`) for Siri-like feature parity tracking
-- Personality engine + proactive suggestions (`/events`, `/suggestions`)
-- Context engine with anti-mishear clarification (`/context`, confirmation flow on low confidence)
-- Fallback responder if local model is unavailable/invalid (keeps API conversational without hard failure)
-- Reminders API (`/reminders`) + organism reminder processing
-- Privacy-guarded device search (`/device_search`) with allowlisted paths
-- OS action interface (`/os_action`) guarded by `os_level_control` permission
-- Permission controls for always mic/speaker + device search + phone-off execution
+If BitNet returns degraded output, Maya automatically falls back to the local assistant layer in `maya_core/assistant_engine.py` and `maya_core/fallback_llm.py` so replies stay usable.
 
-### Privacy defense
-- explicit permission gates on sensitive capabilities
-- API key auth
-- filesystem search restricted to safe roots (Documents/Downloads/Desktop)
+## Native direction
 
-### Platform boundary
-Deep Siri-equivalent OS control requires native platform plugins (Android/iOS telephony/notification APIs). This repo includes the permissioned OS-action bridge interface and capability detection so those native plugins can be added safely per device.
+The Android app is the real product surface:
 
+- foreground assistant service
+- runtime profile driven offline inference coordination
+- permission-aware capability inspection
+- action routing for native device behaviors
+- HyperOS bridge path for OEM-specific extensions
+- local conversation memory
+- runtime registry for `MLC`, `BitNet`, `whisper.cpp`, `piper`, `openWakeWord`, and vendor stacks
+- vendor vision/audio references pulled into `vendor/mediapipe` and `vendor/tensorflow-examples`
 
-Vendor components are unpacked into `integrations/vendor/` and referenced by shims in `integrations/`.
+## Capability direction
+
+- wake word activation
+- offline speech recognition
+- local response generation with `MLC LLM Android` as primary runtime
+- optional heavier fallback using `BitNet`
+- reminders, notifications, and scheduling
+- calling and messaging flows
+- context memory and proactive suggestions
+- guarded device actions and search
+- vendor reuse from OVOS, HiveMind, and Home Assistant where it improves Maya
+
+## Platform boundary
+
+The deepest Siri-like device control depends on public Android APIs, assistant-role privileges, accessibility permissions, device-owner mode, OEM-private APIs, or privileged/system app deployment on the target phone.

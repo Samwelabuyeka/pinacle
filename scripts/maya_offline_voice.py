@@ -4,15 +4,16 @@
 This is not Apple's Siri and cannot access private iOS APIs.
 """
 import argparse
-import os
-import subprocess
 import sys
+from pathlib import Path
 
-BITNET_DIR = os.environ.get("BITNET_DIR", os.path.expanduser("~/bitnet.cpp"))
-MODEL_PATH = os.environ.get(
-    "BITNET_MODEL",
-    os.path.join(BITNET_DIR, "models/BitNet-b1.58-2B-4T/ggml-model-i2_s.gguf"),
-)
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from maya_core.assistant_engine import generate_reply
+from maya_core.context_engine import ContextEngine
+from maya_core.local_llm import BITNET_DIR, BITNET_MODEL, bitnet_ready
 
 
 def speak(text: str):
@@ -23,23 +24,6 @@ def speak(text: str):
         engine.runAndWait()
     except Exception:
         print("[TTS unavailable]", text)
-
-
-def run_local_inference(prompt: str, n_predict: int = 96) -> str:
-    cmd = [
-        "python",
-        os.path.join(BITNET_DIR, "run_inference.py"),
-        "-m",
-        MODEL_PATH,
-        "-p",
-        prompt,
-        "-n",
-        str(n_predict),
-    ]
-    proc = subprocess.run(cmd, cwd=BITNET_DIR, capture_output=True, text=True)
-    if proc.returncode != 0:
-        return proc.stderr.strip()[-1200:] or "Inference failed"
-    return proc.stdout.strip()
 
 
 def listen_once() -> str:
@@ -59,14 +43,24 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--text-only", action="store_true", help="Disable TTS and use typed input")
     parser.add_argument("--once", type=str, default="", help="Run one prompt and exit")
+    parser.add_argument("--status", action="store_true", help="Print local runtime status and exit")
+    parser.add_argument("--tokens", type=int, default=96, help="Maximum tokens to generate")
     args = parser.parse_args()
+    context = ContextEngine()
 
-    if not os.path.exists(os.path.join(BITNET_DIR, "build/bin/llama-cli")):
-        print("Missing binary: ~/bitnet.cpp/build/bin/llama-cli", file=sys.stderr)
+    if args.status:
+        print(f"bitnet_dir={BITNET_DIR}")
+        print(f"bitnet_model={BITNET_MODEL}")
+        print(f"bitnet_ready={bitnet_ready()}")
+        return
+
+    if not bitnet_ready():
+        print(f"BitNet runtime not ready. dir={BITNET_DIR} model={BITNET_MODEL}", file=sys.stderr)
         sys.exit(1)
 
     if args.once:
-        out = run_local_inference(args.once)
+        out = generate_reply(args.once, context=context, tokens=args.tokens)
+        context.add_turn(args.once, out)
         print(out)
         if not args.text_only:
             speak(out)
@@ -77,7 +71,8 @@ def main():
         user_text = input("You: ").strip() if args.text_only else listen_once().strip()
         if user_text.lower() in {"exit", "quit"}:
             break
-        answer = run_local_inference(user_text)
+        answer = generate_reply(user_text, context=context, tokens=args.tokens)
+        context.add_turn(user_text, answer)
         print("Maya:", answer)
         if not args.text_only:
             speak(answer)

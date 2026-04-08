@@ -1,0 +1,24 @@
+﻿{
+    "generatedAt":  "2026-04-08T12:47:02.3660773+03:00",
+    "mlc":  {
+                "bundled":  false,
+                "notes":  [
+                              "MLC config asset not found under android-native/dist/lib/mlc4j.",
+                              "MLC runtime shared library not found under android-native/dist/lib/mlc4j/output/arm64-v8a."
+                          ]
+            },
+    "whisper":  {
+                    "bundled":  false,
+                    "notes":  [
+                                  "No whisper model file was found under C:\\Users\\Marlyne\\maya_vendor\\whisper.cpp.",
+                                  "No Android whisper shared library was found."
+                              ]
+                },
+    "wakeWord":  {
+                     "bundled":  false,
+                     "notes":  [
+                                   "No wake-word model file was found under C:\\Users\\Marlyne\\maya_vendor\\openWakeWord.",
+                                   "No Android wake-word shared library was found."
+                               ]
+                 }
+}

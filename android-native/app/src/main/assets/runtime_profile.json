@@ -1,0 +1,18 @@
+{
+  "languageModelBackend": "MLC",
+  "wakeWordBackend": "OPEN_WAKE_WORD",
+  "speechRecognitionBackend": "WHISPER_CPP",
+  "speechSynthesisBackend": "PIPER",
+  "primaryModelId": "Maya-MLC-Qwen3-4B-Instruct",
+  "fallbackModelId": "BitNet-b1.58-2B-4T",
+  "heavyModelId": "Mixtral-8x7B-Instruct-GGUF",
+  "phoneModelId": "Maya-MLC-Qwen3-4B-Instruct",
+  "modelRoutingStrategy": "phone_primary_heavy_escalation",
+  "voiceProfileId": "maya-premium-female-en",
+  "voiceStyle": "warm_confident_expressive",
+  "voiceBackendTarget": "piper_high_quality_female",
+  "phoneOptimized": true,
+  "assistantPersona": "Maya",
+  "targetDeviceClass": "android_phone_hyperos_capable",
+  "requiresPrivilegedAccess": true
+}

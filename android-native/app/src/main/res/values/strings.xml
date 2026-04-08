@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Maya Native</string>
+    <string name="native_summary">Offline-first Android assistant shell for voice, automation, context, and OEM-specific bridges such as HyperOS.</string>
+    <string name="start_assistant">Start Offline Assistant</string>
+    <string name="grant_access">Grant Core Permissions</string>
+    <string name="enable_notifications">Enable Notification Access</string>
+    <string name="enable_accessibility">Enable Accessibility Bridge</string>
+    <string name="open_default_apps">Open Default Apps</string>
+    <string name="unlock_systems">Unlock Deep System Access</string>
+    <string name="open_usage_access">Open Usage Access</string>
+    <string name="open_overlay_access">Open Overlay Access</string>
+    <string name="owner_phrase_hint">Owner-only unlock phrase</string>
+    <string name="enroll_owner_voice">Enroll Owner Voice Gate</string>
+    <string name="verify_owner_biometric">Verify Owner Biometric</string>
+    <string name="request_device_admin">Enable Screen Lock Control</string>
+    <string name="lock_now">Lock Screen Now</string>
+    <string name="notification_privacy">Open Notification Privacy</string>
+    <string name="run_prompt">Run Prompt</string>
+    <string name="prompt_hint">Ask Maya anything offline</string>
+    <string name="model_manifest_title">Model Manifest</string>
+    <string name="response_title">Maya Response</string>
+    <string name="accessibility_service_summary">Maya accessibility bridge for deeper device control and assistive automation.</string>
+</resources>

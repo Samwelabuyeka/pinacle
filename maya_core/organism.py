@@ -5,9 +5,11 @@ from __future__ import annotations
 import json
 import os
 import sqlite3
-import subprocess
 import time
 from pathlib import Path
+
+from maya_core.assistant_engine import generate_reply
+from maya_core.context_engine import ContextEngine
 
 HOME = Path.home()
 BITNET_DIR = Path(os.environ.get("BITNET_DIR", str(HOME / "bitnet.cpp")))
@@ -21,6 +23,7 @@ DB_PATH = Path(os.environ.get("MAYA_MEMORY_DB", str(HOME / ".maya_memory.db")))
 class MayaOrganism:
     def __init__(self):
         self.db = sqlite3.connect(DB_PATH)
+        self.context = ContextEngine()
         self.db.execute(
             "create table if not exists memory (id integer primary key, ts real, kind text, payload text)"
         )
@@ -34,20 +37,9 @@ class MayaOrganism:
         self.db.commit()
 
     def infer(self, prompt: str) -> str:
-        cmd = [
-            "python",
-            str(BITNET_DIR / "run_inference.py"),
-            "-m",
-            str(MODEL_PATH),
-            "-p",
-            prompt,
-            "-n",
-            "96",
-        ]
-        proc = subprocess.run(cmd, cwd=BITNET_DIR, capture_output=True, text=True)
-        if proc.returncode != 0:
-            return proc.stderr.strip()[-1000:] or "inference_failed"
-        return proc.stdout.strip()
+        response = generate_reply(prompt, context=self.context)
+        self.context.add_turn(prompt, response)
+        return response
 
     def _load_tasks(self) -> list[dict]:
         if not TASK_FILE.exists():
