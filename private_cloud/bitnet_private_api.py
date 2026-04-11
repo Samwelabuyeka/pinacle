@@ -100,6 +100,20 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         if not self._auth():
             return
+        # Handle root path
+        if self.path == "/":
+            return self._send(200, {
+                "message": "Maya BitNet Private API",
+                "endpoints": [
+                    "GET /health", "GET /capabilities", "GET /permissions",
+                    "GET /tasks", "GET /reminders", "GET /notifications",
+                    "GET /suggestions", "GET /context", "GET /siri_capabilities",
+                    "GET /capability_matrix",
+                    "POST /generate", "POST /permissions", "POST /events",
+                    "POST /tasks", "POST /reminders", "POST /notifications",
+                    "POST /os_action", "POST /device_search"
+                ]
+            })
         if self.path == "/permissions":
             return self._send(200, {"permissions": get_permissions()})
         if self.path == "/tasks":
@@ -125,14 +139,14 @@ class Handler(BaseHTTPRequestHandler):
                 "permissions": PERM_FILE.exists(),
             }
             return self._send(200, health)
-        return self._send(404, {"error": "not_found"})
+        return self._send(404, {"error": "not_found", "available_endpoints": ["GET /", "GET /health", "GET /capabilities"]})
 
     def do_POST(self):
         if not self._auth():
             return
 
         length = int(self.headers.get("Content-Length", "0"))
-        data = json.loads(self.rfile.read(length) or b"{}")
+        data = json.loads(self.rfile.read(length) or b"{}")[
 
         if self.path == "/permissions":
             current = get_permissions()
@@ -209,47 +223,55 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(403, {"error": "privacy_guard_blocked_path"})
             return self._send(200, {"results": search_files(base, query)})
 
-        if self.path != "/generate":
-            return self._send(404, {"error": "not_found"})
+        if self.path == "/generate":
+            perms = get_permissions()
+            if not perms.get("ai_chat"):
+                return self._send(403, {"error": "permission_denied: ai_chat"})
 
-        perms = get_permissions()
-        if not perms.get("ai_chat"):
-            return self._send(403, {"error": "permission_denied: ai_chat"})
+            prompt = data.get("prompt")
+            if not prompt:
+                return self._send(400, {"error": "prompt_required"})
+            needs, msg = CTX.clarification_needed(prompt, action_sensitive=False)
+            if needs and not data.get("confirmed", False):
+                return self._send(409, {"clarification_required": True, "message": msg})
 
-        prompt = data.get("prompt")
-        if not prompt:
-            return self._send(400, {"error": "prompt_required"})
-        needs, msg = CTX.clarification_needed(prompt, action_sensitive=False)
-        if needs and not data.get("confirmed", False):
-            return self._send(409, {"clarification_required": True, "message": msg})
+            llama_cli = os.path.join(BITNET_DIR, "build/bin/llama-cli")
+            if not os.path.exists(llama_cli):
+                return self._send(503, {"error": f"missing_binary: {llama_cli}. Build BitNet first."})
+            if not os.path.exists(MODEL_PATH):
+                return self._send(503, {"error": f"missing_model: {MODEL_PATH}. Download model and run setup_env.py."})
 
-        llama_cli = os.path.join(BITNET_DIR, "build/bin/llama-cli")
-        if not os.path.exists(llama_cli):
-            return self._send(503, {"error": f"missing_binary: {llama_cli}. Build BitNet first."})
-        if not os.path.exists(MODEL_PATH):
-            return self._send(503, {"error": f"missing_model: {MODEL_PATH}. Download model and run setup_env.py."})
+            contextual_prompt = f"Recent context:\n{CTX.recent_summary()}\n\nUser request:\n{prompt}"
+            cmd = [
+                "python",
+                os.path.join(BITNET_DIR, "run_inference.py"),
+                "-m",
+                MODEL_PATH,
+                "-p",
+                contextual_prompt,
+                "-n",
+                str(data.get("n_predict", 64)),
+            ]
 
-        contextual_prompt = f"Recent context:\n{CTX.recent_summary()}\n\nUser request:\n{prompt}"
-        cmd = [
-            "python",
-            os.path.join(BITNET_DIR, "run_inference.py"),
-            "-m",
-            MODEL_PATH,
-            "-p",
-            contextual_prompt,
-            "-n",
-            str(data.get("n_predict", 64)),
-        ]
+            try:
+                proc = subprocess.run(cmd, capture_output=True, text=True, check=True, cwd=BITNET_DIR)
+                out = proc.stdout.strip()
+                CTX.add_turn(prompt, out)
+                return self._send(200, {"output": out, "suggestions": PERSONA.suggestions()})
+            except subprocess.CalledProcessError as exc:
+                fb = generate_fallback(prompt)
+                CTX.add_turn(prompt, fb)
+                return self._send(200, {"output": fb, "fallback": True, "error": exc.stderr[-280:]})
 
-        try:
-            proc = subprocess.run(cmd, capture_output=True, text=True, check=True, cwd=BITNET_DIR)
-            out = proc.stdout.strip()
-            CTX.add_turn(prompt, out)
-            return self._send(200, {"output": out, "suggestions": PERSONA.suggestions()})
-        except subprocess.CalledProcessError as exc:
-            fb = generate_fallback(prompt)
-            CTX.add_turn(prompt, fb)
-            return self._send(200, {"output": fb, "fallback": True, "error": exc.stderr[-280:]})
+        # Catch-all for unknown POST routes
+        return self._send(404, {
+            "error": "not_found",
+            "available_endpoints": [
+                "POST /generate", "POST /permissions", "POST /events",
+                "POST /tasks", "POST /reminders", "POST /notifications",
+                "POST /os_action", "POST /device_search"
+            ]
+        })
 
 
 def main():
